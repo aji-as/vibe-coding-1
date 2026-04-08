@@ -90,3 +90,21 @@ export async function getCurrent(token: string) {
 
   return { data: result[0] };
 }
+
+export async function logout(token: string) {
+  // Cek apakah session ada
+  const existing = await db
+    .select()
+    .from(session)
+    .where(eq(session.token, token))
+    .limit(1);
+
+  if (existing.length === 0) {
+    throw new Error("Unauthorized");
+  }
+
+  // Hapus session
+  await db.delete(session).where(eq(session.token, token));
+
+  return { data: "OK" };
+}
