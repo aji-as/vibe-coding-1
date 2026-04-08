@@ -69,3 +69,24 @@ export async function login(payload: RegisterPayload) {
 
   return { data: token };
 }
+
+export async function getCurrent(token: string) {
+  // Cari session join dengan users
+  const result = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      createdAt: users.createdAt,
+    })
+    .from(session)
+    .innerJoin(users, eq(session.userId, users.id))
+    .where(eq(session.token, token))
+    .limit(1);
+
+  if (result.length === 0) {
+    throw new Error("Unauthorized");
+  }
+
+  return { data: result[0] };
+}
